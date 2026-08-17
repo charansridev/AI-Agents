@@ -83,7 +83,6 @@ RAG-Agents/
 
 ## 🎓 Prerequisite Knowledge
 
-- **Domain Knowledge**: Indian Income Tax Regimes (Old vs New), Section 80C/80D/80TTA deductions, ITR form types (ITR-1 to 7), GST rates, and financial asset pricing.
 - **RAG & Vector Search**: Recursive text chunking, dense vector embeddings (`all-MiniLM-L6-v2`), and Chroma vector database management.
 - **LLMs & Agent Tooling**:
   - `langchain-groq` (`llama-3.3-70b-versatile`) & `langchain-google-genai` (`gemini-2.5-flash`)
