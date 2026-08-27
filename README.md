@@ -1,6 +1,6 @@
 # AI Agents - RAG-Powered Intelligent Assistants
 
-A collection of Retrieval-Augmented Generation (RAG) agents and AI-powered advisors built for real-world use cases including Indian tax advisory, personal finance consulting, research paper Q&A, and live web documentation analysis.
+A collection of Retrieval-Augmented Generation (RAG) agents and AI-powered advisors built for real-world use cases including Indian tax advisory, personal finance consulting, skill-to-career mapping, research paper Q&A, and live web documentation analysis.
 
 ---
 
@@ -12,6 +12,7 @@ A collection of Retrieval-Augmented Generation (RAG) agents and AI-powered advis
   - [Voice-Enabled Finance Advisor](#2-voice-enabled-finance-advisor)
   - [PDF Research Paper RAG](#3-pdf-research-paper-rag)
   - [Web Documentation RAG](#4-web-documentation-rag)
+  - [SkillMap Agent](#5-skillmap-agent)
 - [Architecture](#architecture)
 - [Evaluation](#evaluation)
 - [Project Structure](#project-structure)
@@ -99,6 +100,26 @@ Crawls and indexes live developer documentation pages, then answers technical qu
 
 ---
 
+### 5. SkillMap Agent
+
+**Notebook:** `SkillMap_Agent.ipynb`
+
+A Skill-to-Career Mapping agent that helps students and professionals understand real-time industry demand for any skill and find matching job openings with direct apply links.
+
+**Capabilities:**
+- Real-time skill demand analysis using Tavily web search
+- Live job listings via JSearch API (RapidAPI) with location-aware search
+- Multi-country support (India, USA, and more)
+- Combined market insights + actionable job links in a single response
+
+**Tools:**
+- `skill_demand_tool` (Tavily Search) - Industry demand, salary trends, and career insights
+- `search_jobs` (JSearch API) - Actual job listings with titles, companies, locations, and apply links
+
+**Model:** Google Gemini 2.5 Flash | **Output:** Structured text with job details and apply links
+
+---
+
 ## Architecture
 
 ```mermaid
@@ -116,6 +137,8 @@ flowchart TD
         G --> H
         H <-->|RAG Search| E
         H <-->|Market Data| I[Metals API]
+        H <-->|Skill Demand| P[Tavily Search]
+        H <-->|Job Listings| Q[JSearch API]
         H --> J[Groq / Gemini LLM]
     end
 
@@ -155,6 +178,7 @@ AI-Agents/
 │   ├── New vs. Old Regime FAQs approved final.pdf
 │   └── Personal_Tax_AI_Advisor.ipynb
 ├── Personal_finance_advicer (5).ipynb
+├── SkillMap_Agent.ipynb
 ├── RAG.ipynb
 ├── docuchat_with_webdocs (3).ipynb
 └── README.md
@@ -171,6 +195,8 @@ AI-Agents/
 | Embeddings | HuggingFace `all-MiniLM-L6-v2` via `sentence-transformers` |
 | Vector Store | Chroma |
 | Document Loaders | `PyPDFLoader`, `WebBaseLoader` (BeautifulSoup4) |
+| Web Search | Tavily Search (skill demand research) |
+| Job Search | JSearch API via RapidAPI |
 | Voice | AssemblyAI (STT), Murf.AI (TTS) |
 | Evaluation | RAGAS |
 | Interface | Gradio |
@@ -191,6 +217,8 @@ These notebooks are designed to run in **Google Colab**.
 | `gemini_api_key` | [Google AI Studio](https://aistudio.google.com/) | All notebooks |
 | `ASSEMBLYAI_API_KEY` | [AssemblyAI](https://www.assemblyai.com/) | Finance Advisor |
 | `MURF_API_KEY` | [Murf.AI](https://murf.ai/) | Finance Advisor |
+| `TAVILY_API_KEY` | [Tavily](https://tavily.com/) | SkillMap Agent |
+| `RAPIDAPI_KEY` | [RapidAPI](https://rapidapi.com/) | SkillMap Agent |
 
 Enable **Notebook access** for each secret.
 
@@ -206,8 +234,8 @@ To run outside of Colab, make these adjustments:
 
 ```bash
 pip install langchain langchain-community langchain-huggingface langchain-chroma \
-    langchain-groq langchain-google-genai sentence-transformers pypdf \
-    beautifulsoup4 gradio assemblyai ragas python-dotenv requests
+    langchain-groq langchain-google-genai langchain-tavily sentence-transformers \
+    pypdf beautifulsoup4 gradio assemblyai ragas python-dotenv requests
 ```
 
 **Replace Colab secrets with environment variables:**
@@ -222,6 +250,8 @@ groq_api_key = os.getenv("GROQ_API_KEY")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 assemblyai_key = os.getenv("ASSEMBLYAI_API_KEY")
 murf_key = os.getenv("MURF_API_KEY")
+tavily_key = os.getenv("TAVILY_API_KEY")
+rapidapi_key = os.getenv("RAPIDAPI_KEY")
 ```
 
 **Other changes:**
