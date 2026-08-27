@@ -1,167 +1,236 @@
-# RAG Agents & AI Advisors 🤖📚
+# AI Agents - RAG-Powered Intelligent Assistants
 
-A collection of Retrieval-Augmented Generation (RAG) AI agents and autonomous advisors built with **LangChain**, **HuggingFace Embeddings**, **Chroma Vector Database**, **Groq** (`llama-3.3-70b-versatile`), **Google Gemini** (`gemini-2.5-flash`), **AssemblyAI**, **Murf.AI**, **Gradio**, and **RAGAS Evaluation Framework**.
-
-This repository contains intelligent assistants for Indian Personal Income Tax advising, Indian Personal Finance & market data consulting, PDF research paper Q&A, and live web documentation analysis.
+A collection of Retrieval-Augmented Generation (RAG) agents and AI-powered advisors built for real-world use cases including Indian tax advisory, personal finance consulting, research paper Q&A, and live web documentation analysis.
 
 ---
 
-## 🌟 Overview & Architecture
+## Table of Contents
 
-These agents combine RAG document ingestion, multi-provider LLM reasoning (Groq & Gemini), custom tools, voice interaction, and automated RAG evaluation metrics.
+- [Overview](#overview)
+- [Agents](#agents)
+  - [Personal Tax AI Advisor](#1-personal-tax-ai-advisor)
+  - [Voice-Enabled Finance Advisor](#2-voice-enabled-finance-advisor)
+  - [PDF Research Paper RAG](#3-pdf-research-paper-rag)
+  - [Web Documentation RAG](#4-web-documentation-rag)
+- [Architecture](#architecture)
+- [Evaluation](#evaluation)
+- [Project Structure](#project-structure)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Google Colab Setup](#google-colab-setup)
+  - [Running Locally as Python Scripts](#running-locally-as-python-scripts)
+- [Contributing](#contributing)
+
+---
+
+## Overview
+
+Each agent in this repository follows a consistent RAG pipeline:
+
+1. **Ingest** documents (PDFs, web pages) using LangChain loaders
+2. **Chunk** text with recursive character splitting
+3. **Embed** chunks using HuggingFace (`all-MiniLM-L6-v2`)
+4. **Store** vectors in a Chroma database
+5. **Query** with an LLM-powered agent that retrieves relevant context before generating grounded answers
+
+Multi-provider LLM support includes **Groq** (`llama-3.3-70b-versatile`) and **Google Gemini** (`gemini-2.5-flash`), with optional voice interaction via AssemblyAI and Murf.AI.
+
+---
+
+## Agents
+
+### 1. Personal Tax AI Advisor
+
+**Notebook:** `Personal tax Advisor/Personal_Tax_AI_Advisor.ipynb`
+
+An AI agent that answers complex Indian income tax queries with source-backed responses.
+
+**Capabilities:**
+- Old vs. New Tax Regime comparison
+- Section 80C/80D deduction guidance
+- ITR form selection (ITR-1 through ITR-7)
+- Filing rules, deadlines, and penalties
+
+**Data Sources:** CBDT ITR-4 Validation Rules, CBDT FAQ PDFs, SEBI Financial Education Booklet
+
+**Model:** Groq Llama-3.3-70B | **Interface:** Gradio Web UI
+
+---
+
+### 2. Voice-Enabled Finance Advisor
+
+**Notebook:** `Personal_finance_advicer (5).ipynb`
+
+A voice-interactive financial advisor that provides guidance on GST rates, savings instruments, and real-time gold/silver prices in INR.
+
+**Capabilities:**
+- Voice input (speech-to-text via AssemblyAI)
+- Audio response generation (text-to-speech via Murf.AI)
+- Live metals market price lookup
+- GST and savings guidance from official documents
+
+**Data Sources:** SEBI Financial Booklet, CBIC GST Ready Reckoner, Live Metals API
+
+**Model:** Google Gemini 2.5 Flash | **Interface:** Gradio Voice & Text UI
+
+---
+
+### 3. PDF Research Paper RAG
+
+**Notebook:** `RAG.ipynb`
+
+A straightforward RAG agent for grounded Q&A over research papers. Retrieves relevant passages and generates answers with exact metadata citations.
+
+**Example Use Case:** Q&A over the *Attention Is All You Need* paper
+
+**Model:** Google Gemini 2.5 Flash | **Output:** Text with source citations
+
+---
+
+### 4. Web Documentation RAG
+
+**Notebook:** `docuchat_with_webdocs (3).ipynb`
+
+Crawls and indexes live developer documentation pages, then answers technical questions grounded in the indexed content.
+
+**Loader:** `WebBaseLoader` (BeautifulSoup4) | **Retrieval:** Chroma (k=6)
+
+**Model:** Google Gemini 2.5 Flash | **Output:** Formatted Markdown
+
+---
+
+## Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Document Ingestion & Storage
-        A1[Tax PDFs / Finance Books / Research Papers / Web Docs] --> B[LangChain Document Loaders]
-        B --> C[Recursive Character Text Splitter]
-        C --> D[HuggingFace Embeddings: all-MiniLM-L6-v2]
-        D --> E[(Chroma Vector Database)]
+    subgraph Ingestion
+        A[PDFs / Web Docs] --> B[LangChain Loaders]
+        B --> C[Text Splitter]
+        C --> D[HuggingFace Embeddings]
+        D --> E[(Chroma Vector DB)]
     end
 
-    subgraph Agent Execution & Tool Calling
-        F[User Query: Text / Microphone Audio] -->|Audio| G[AssemblyAI Speech-to-Text]
-        G --> H[LangChain AI Agent]
-        F -->|Text| H
-        H <-->|search_tax_docs / search_finance_docs| E
-        H <-->|get_market_price| I[Live Metals Market API]
-        H --> J[Groq Llama-3.3-70B / Google Gemini 2.5 Flash]
+    subgraph Agent
+        F[User Query] -->|Audio| G[AssemblyAI STT]
+        F -->|Text| H[LangChain Agent]
+        G --> H
+        H <-->|RAG Search| E
+        H <-->|Market Data| I[Metals API]
+        H --> J[Groq / Gemini LLM]
     end
 
-    subgraph Output & Evaluation
-        J --> K[Grounded Response + Source Citations]
-        J -->|Audio Generation| L[Murf.AI Text-to-Speech]
-        K --> M[Gradio Interactive Web UI]
+    subgraph Output
+        J --> K[Grounded Response + Citations]
+        J -->|Audio| L[Murf.AI TTS]
+        K --> M[Gradio UI]
         L --> M
-        H --> N[RAGAS Evaluation Framework]
-        N --> O[Faithfulness, Relevancy & Context Precision Metrics]
+        H --> N[RAGAS Evaluation]
     end
 ```
 
 ---
 
-## 🤖 What the Agents Do
+## Evaluation
 
-| Agent / Notebook | Primary Function | Data / Ingestion Source | Core Tools & Models | UI & Evaluation |
-| :--- | :--- | :--- | :--- | :--- |
-| **`Personal tax Advisor/Personal_Tax_AI_Advisor.ipynb`** | **Personal AI Tax Advisor for Indian Citizens** <br> Answers complex tax queries (Old vs. New Tax Regime, Section 80C/80D deductions, ITR form selection ITR-1 to 7, filing rules, penalties). | CBDT ITR-4 Validation Rules, CBDT FAQ PDFs, SEBI Booklet | `search_tax_docs` tool, **Groq Llama-3.3-70B** (`llama-3.3-70b-versatile`) | Gradio Web UI + RAGAS Metric Suite |
-| **`Personal_finance_advicer (5).ipynb`** | **Voice-Enabled Personal Finance Advisor** <br> Financial guidance on GST rates, savings options, and live gold/silver prices in INR with voice input and audio response generation. | SEBI Financial Booklet, CBIC GST Ready Reckoner, Live Metals API | `search_finance_docs`, `get_market_price`, **Gemini 2.5 Flash**, AssemblyAI (STT), Murf.AI (TTS) | Gradio Voice & Text UI + RAGAS Metric Suite |
-| **`RAG.ipynb`** | **PDF Document RAG Agent** <br> Performs grounded Q&A over research papers (e.g., *Attention Is All You Need* paper) with exact metadata citations. | PDF files via `PyPDFLoader` | `similarity_search` ($k=2$), **Gemini 2.5 Flash** | Python text output with source citations |
-| **`docuchat_with_webdocs (3).ipynb`** | **Web Documentation RAG Agent** <br> Crawls, chunks, and answers technical inquiries directly from live developer documentation pages. | Web URLs via `WebBaseLoader` (`BeautifulSoup4`) | Chroma indexing ($k=6$), **Gemini 2.5 Flash** | Formatted Markdown outputs |
+Both advisor notebooks include automated RAG quality evaluation using the **RAGAS** framework:
 
----
-
-## 📊 Automated Evaluation (RAGAS Framework)
-
-Both advisor notebooks feature quantitative RAG evaluation using the **RAGAS** framework:
-
-- **Faithfulness**: Verifies that generated answers are grounded entirely in retrieved PDF context without hallucinations.
-- **Answer Relevancy**: Evaluates how directly the answer addresses the user query.
-- **Context Precision**: Measures the signal-to-noise ratio in retrieved context chunks.
-- **Context Recall**: Verifies if all ground-truth context needed for answering was successfully retrieved.
+| Metric | What It Measures |
+| :--- | :--- |
+| **Faithfulness** | Whether the answer is grounded in retrieved context (no hallucination) |
+| **Answer Relevancy** | How directly the answer addresses the user's question |
+| **Context Precision** | Signal-to-noise ratio in retrieved chunks |
+| **Context Recall** | Whether all necessary context was successfully retrieved |
 
 ---
 
-## 📁 Repository Structure
+## Project Structure
 
-```text
-RAG-Agents/
+```
+AI-Agents/
 ├── Personal tax Advisor/
 │   ├── CBDT_e-Filing_ITR 4_Validation Rules_AY 2026-27.pdf
 │   ├── Common ITR Filing FAQs AY 2024-25.pdf
 │   ├── Financial Education Booklet - English.pdf
 │   ├── ITR-7_FAQ_AY_2024-25.pdf
 │   ├── New vs. Old Regime FAQs approved final.pdf
-│   └── Personal_Tax_AI_Advisor.ipynb      # Groq-powered Indian Tax AI Advisor
-├── Personal_finance_advicer (5).ipynb       # Voice Finance Advisor + RAGAS
-├── RAG.ipynb                                # Research Paper PDF RAG Agent
-├── docuchat_with_webdocs (3).ipynb          # Web Documentation RAG Agent
-└── README.md                                # Repository documentation
+│   └── Personal_Tax_AI_Advisor.ipynb
+├── Personal_finance_advicer (5).ipynb
+├── RAG.ipynb
+├── docuchat_with_webdocs (3).ipynb
+└── README.md
 ```
 
 ---
 
-## 🎓 Prerequisite Knowledge
+## Tech Stack
 
-- **RAG & Vector Search**: Recursive text chunking, dense vector embeddings (`all-MiniLM-L6-v2`), and Chroma vector database management.
-- **LLMs & Agent Tooling**:
-  - `langchain-groq` (`llama-3.3-70b-versatile`) & `langchain-google-genai` (`gemini-2.5-flash`)
-  - LangChain `@tool` decorator, `create_agent`, and `init_chat_model`
-- **Voice APIs**: Speech-to-Text (AssemblyAI) and Text-to-Speech (Murf.AI Falcon model).
-- **RAG Evaluation**: RAGAS metrics (`ragas.llms.LangchainLLMWrapper`).
+| Category | Tools |
+| :--- | :--- |
+| LLMs | Groq (`llama-3.3-70b-versatile`), Google Gemini (`gemini-2.5-flash`) |
+| Framework | LangChain, LangGraph |
+| Embeddings | HuggingFace `all-MiniLM-L6-v2` via `sentence-transformers` |
+| Vector Store | Chroma |
+| Document Loaders | `PyPDFLoader`, `WebBaseLoader` (BeautifulSoup4) |
+| Voice | AssemblyAI (STT), Murf.AI (TTS) |
+| Evaluation | RAGAS |
+| Interface | Gradio |
 
 ---
 
-## 🚀 Setup & Execution Guide (Google Colab)
+## Getting Started
+
+### Google Colab Setup
 
 These notebooks are designed to run in **Google Colab**.
 
-### Step 1: Set Up Secrets in Google Colab
-Open Colab's **Secrets** panel (🔑 icon on the left toolbar) and add:
+**Step 1:** Open Colab's Secrets panel and add the following API keys:
 
-| Secret Name | Purpose | Where to Get | Required Notebook |
-| :--- | :--- | :--- | :--- |
-| `GROQ_API_KEY` | Groq LLM inference (`llama-3.3-70b`) | [Groq Console](https://console.groq.com/) | `Personal_Tax_AI_Advisor.ipynb` |
-| `gemini_api_key` | Google Gemini LLM access | [Google AI Studio](https://aistudio.google.com/) | All notebooks |
-| `ASSEMBLYAI_API_KEY` | Speech-to-Text transcription | [AssemblyAI Dashboard](https://www.assemblyai.com/) | `Personal_finance_advicer (5).ipynb` |
-| `MURF_API_KEY` | Text-to-Speech audio synthesis | [Murf.AI API Portal](https://murf.ai/) | `Personal_finance_advicer (5).ipynb` |
+| Secret Name | Source | Required By |
+| :--- | :--- | :--- |
+| `GROQ_API_KEY` | [Groq Console](https://console.groq.com/) | Tax Advisor |
+| `gemini_api_key` | [Google AI Studio](https://aistudio.google.com/) | All notebooks |
+| `ASSEMBLYAI_API_KEY` | [AssemblyAI](https://www.assemblyai.com/) | Finance Advisor |
+| `MURF_API_KEY` | [Murf.AI](https://murf.ai/) | Finance Advisor |
 
-*Make sure **Notebook access** is enabled for all added secrets.*
+Enable **Notebook access** for each secret.
 
-### Step 2: Run Notebooks
-Execute notebook cells sequentially to install dependencies, load PDFs, initialize Chroma vector stores, run agent queries, launch Gradio interfaces, and execute RAGAS evaluations.
+**Step 2:** Run cells sequentially. Each notebook handles its own dependency installation, document loading, vector store creation, and UI launch.
 
 ---
 
-## 🐍 Running as Python (`.py`) Scripts: Key Modifications
+### Running Locally as Python Scripts
 
-To execute these notebooks as standard Python scripts (`.py`), make the following minimal code adjustments:
+To run outside of Colab, make these adjustments:
 
-### 1. Dependency Installation
-Remove `!pip install` lines and install required packages in your environment:
+**Install dependencies:**
+
 ```bash
-pip install langchain langchain-community langchain-huggingface langchain-chroma langchain-groq langchain-google-genai sentence-transformers pypdf beautifulsoup4 gradio assemblyai ragas python-dotenv requests
+pip install langchain langchain-community langchain-huggingface langchain-chroma \
+    langchain-groq langchain-google-genai sentence-transformers pypdf \
+    beautifulsoup4 gradio assemblyai ragas python-dotenv requests
 ```
 
-### 2. Environment Variable Management
-Replace `google.colab.userdata` with `python-dotenv` and `os.getenv`:
+**Replace Colab secrets with environment variables:**
 
 ```python
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
 groq_api_key = os.getenv("GROQ_API_KEY")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 assemblyai_key = os.getenv("ASSEMBLYAI_API_KEY")
 murf_key = os.getenv("MURF_API_KEY")
 ```
 
-### 3. Path & Output Adjustments
-- Update Colab paths (e.g. `/content/drive/MyDrive/...`) to relative local paths (e.g. `./Personal tax Advisor/CBDT_e-Filing...pdf`).
-- Replace `display(Markdown(...))` calls with standard `print()` functions.
-
-### 4. CLI / Gradio Entry Point
-Wrap script execution inside `if __name__ == "__main__":`:
-
-```python
-if __name__ == "__main__":
-    demo.launch()
-```
+**Other changes:**
+- Update file paths from Colab format (`/content/drive/...`) to local relative paths (`./Personal tax Advisor/...`)
+- Replace `display(Markdown(...))` with `print()`
+- Wrap entry points in `if __name__ == "__main__":`
 
 ---
 
-## 📜 Dependencies Summary
+## Contributing
 
-- **LLMs & Agents**: `langchain`, `langchain-groq`, `langchain-google-genai`
-- **Document Processing**: `pypdf`, `beautifulsoup4`, `langchain-text-splitters`
-- **Vector Database & Embeddings**: `sentence-transformers`, `langchain-huggingface`, `langchain-chroma`
-- **Voice & Audio**: `assemblyai`, `requests` (Murf.AI API)
-- **Evaluation**: `ragas`
-- **Interface**: `gradio`
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to open an issue or submit a pull request.
+Contributions, issues, and feature requests are welcome. Feel free to open an issue or submit a pull request.
