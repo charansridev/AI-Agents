@@ -1,0 +1,52 @@
+# Environments & secrets
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# uv
+.uv/
+uv.toml.local
+
+# Tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.benchmarks/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Audio / media outputs (sounddevice + soundfile)
+*.wav
+*.mp3
+*.flac
+*.ogg
+*.m4a
+recordings/
+outputs/
+output/
+
+# Editors & OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
